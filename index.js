@@ -10,7 +10,7 @@ app.use(morgan("dev"))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
-mongoose.connect("mongodb://localhost/lunch-vote", (err) => {
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/lunch-vote", (err) => {
     if (err) throw err
     console.log("Connected to the lunch-vote database!")
 })
