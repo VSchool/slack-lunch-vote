@@ -14,12 +14,20 @@ if (weekdays.includes(day)) {
                 .then(response => {
                     console.log("Done!")
                     console.log(response)
-                    process.exit(0)
+                    mongoose.disconnect()
+                        .then(() => {
+                            console.log("Disconnected from db")
+                            process.exit(0)
+                        })
                 })
                 .catch(err => {
-                    console.error("There was a problem!")
+                    console.error("There was a Problem!")
                     console.error(err)
-                    process.exit(1)
+                    mongoose.disconnect()
+                        .then(() => {
+                            console.log("Disconnected from db")
+                            process.exit(1)
+                        })
                 })
         })
     }
