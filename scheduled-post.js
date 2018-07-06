@@ -11,7 +11,16 @@ if (weekdays.includes(day)) {
             console.log("Connected to the db!")
             require("dotenv").config()
             presentOptions()
-            console.log("Done!")
+                .then(response => {
+                    console.log("Done!")
+                    console.log(response)
+                    process.exit(0)
+                })
+                .catch(err => {
+                    console.error("There was a problem!")
+                    console.error(err)
+                    process.exit(1)
+                })
         })
     }
 }
