@@ -19,9 +19,9 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/lunch-vote", (e
 })
 
 const slackInteractions = createMessageAdapter(process.env.SLACK_VERIFICATION_TOKEN);
-app.use("/slack/actions", slackInteractions.expressMiddleware())Z
+app.use("/slack/actions", slackInteractions.expressMiddleware())
+app.use("/slack", require("./routes/slack"))
 app.use("/restaurants", require("./routes/restaurants"))
-// app.use(require("./routes/slack"))
 
 app.listen(PORT, () => {
     console.log(`App is listening on port ${PORT}`)

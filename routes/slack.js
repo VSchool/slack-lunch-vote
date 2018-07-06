@@ -12,86 +12,80 @@ const Restaurant = require("../models/restaurant")
 // cron.schedule("20 12 * * 1-5", presentOptions)
 
 
-
-
 /*
 The Events API will allow the app to listen and respond to when a user clicks a button with their chosen
 Restaurant. Until this is implemented, we're just displaying 5 options to the user and letting the people
 in the lunch channel discuss which of those options they want.
 */
-router.use("/slack/events", slackEvents.expressMiddleware())
-
-router.post("/slack/events", (req, res) => {
-    res.send({ challenge: req.body.challenge })
-});
+// router.use("/slack/events", slackEvents.expressMiddleware())
+//
+// router.post("/slack/events", (req, res) => {
+//     res.send({ challenge: req.body.challenge })
+// });
 /* END Events handler section, which I may look into later */
 
+const web = new WebClient(process.env.BOT_USER_OAUTH_TOKEN)
 
+const slackInteractions = createMessageAdapter(process.env.SLACK_VERIFICATION_TOKEN);
+router.use("/actions", slackInteractions.expressMiddleware())
 
-
-// const slackInteractions = createMessageAdapter(process.env.SLACK_VERIFICATION_TOKEN);
-// const web = new WebClient(process.env.BOT_USER_OAUTH_TOKEN)
-// router.use(slackInteractions.expressMiddleware())
-router.get("/", (req, res) => {
-    console.log("Working POST")
-    res.send({message: "OK"})
+slackInteractions.action("vschool_lunch_vote_add_restaurant", (payload, respond) => {
+    const restaurantToAdd = new Restaurant(payload.submission)
+    restaurantToAdd.save()
+        .then(() => {
+            respond({ response_type: "in_channel", text: `${payload.user.name} added ${restaurantToAdd.name} to the database.` })
+        })
+        .catch(err => res.status(500).send(err))
+    respond({ text: "Awesome! Thanks for adding to the lunch database!" })
 })
 
-// router.post("/", (req, res) => {
-//     const lunchChannelId = process.env.LUNCH_CHANNEL_ID
-//     web.dialog.open({
-//         trigger_id: req.body.trigger_id,
-//         dialog: {
-//             callback_id: "vschool-lunch-vote",
-//             title: "Add a Restaurant",
-//             elements: [
-//                 {
-//                     label: "Restaurant Name",
-//                     name: "name",
-//                     type: "text"
-//                 },
-//                 {
-//                     label: "Cuisine Type",
-//                     name: "cuisine",
-//                     type: "text",
-//                     placeholder: "American, Mexican, Asian, Burgers, etc."
-//                 }
-//             ]
-//
-//         }
+// slackInteractions.action("lunch_vote_get_restaurants_list", (payload, respond) => {
+//     Restaurant.find((err, list) => {
 //
 //     })
-//
-//     // web.chat.postMessage({
-//     //     channel: lunchChannelId,
-//     //     text: "New tests"
-//     // })
-//
-//     // Shows the user's slash command in the chat
-//     return res.send({response_type: "in_channel"})
-//     // if (!req.body.text) {
-//     //     web.chat.postMessage({
-//     //         channel: lunchChannelId,
-//     //         text: "You must "
-//     //     })
-//     // }
-//     // const entries = req.body.text.trim().split(",").map(entry => entry.trim())
-//     // const newRestaurant = entries.reduce((obj, entry) => {
-//     //     const keyValPair = entry.split(":").map(keyval => keyval.trim())
-//     //     if (Restaurant.schema.paths[keyValPair[0].toLowerCase()]) {  // If this is a valid property of the schema
-//     //         obj[keyValPair[0].toLowerCase()] = keyValPair[1]
-//     //     }
-//     //     return obj
-//     // }, {})
-//     //
-//     // const restaurantToAdd = new Restaurant(newRestaurant)
-//     // restaurantToAdd.save()
-//     //     .then(() => {
-//     //         web.chat.postMessage({ channel: lunchChannelId, text: `Added ${restaurantToAdd.name} to the database!` })
-//     //         // return res.end()
-//     //     })
-//     //     .catch(err => res.status(500).send(err))
 // })
+
+router.post("/commands", (req, res) => {
+    const lunchChannelId = process.env.LUNCH_CHANNEL_ID
+    const command = req.body.text.split(" ")[0]
+    if (command === "add") {
+        web.dialog.open({
+            trigger_id: req.body.trigger_id,
+            dialog: {
+                callback_id: "vschool_lunch_vote_add_restaurant",
+                title: "Add a Restaurant",
+                elements: [
+                    {
+                        label: "Restaurant Name",
+                        name: "name",
+                        type: "text"
+                    },
+                    {
+                        label: "Cuisine Type",
+                        name: "cuisine",
+                        type: "text",
+                        placeholder: "American, Mexican, Asian, Burgers, etc."
+                    }
+                ]
+
+            }
+
+        })
+        return res.end()
+    } else if(command === "list") {
+        Restaurant.find((err, list) => {
+            if (err) return res.status(500).send({text: "There was an error. Please let Bob know something is wrong."})
+            const displayList = list.map(item => item.name).join(", ")
+            return res.send({
+                channel: lunchChannelId,
+                text: displayList,
+                user: req.body.user_id
+            })
+        })
+    } else {
+        return res.send("Must put 'add' or 'list' after your slash command")
+    }
+})
 
 
 router.post("/slacktest", presentOptions)

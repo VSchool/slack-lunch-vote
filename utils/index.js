@@ -59,7 +59,7 @@ function presentOptions(req, res) {
         })
 
 
-    // For when I want to add interactive buttons. For now, we'll use emoji votes
+    // For when I want to add interactive buttons.
     // const message = {
     //     channel: lunchChannelId,
     //     text: "Which place would you like to go?",
