@@ -1,4 +1,4 @@
-const { WebClient } = require('@slack/client');
+const { WebClient } = require('@slack/client')
 const Restaurant = require("../models/restaurant")
 
 function presentOptions(req, res) {
@@ -7,7 +7,11 @@ function presentOptions(req, res) {
     Restaurant.find()
         .sort("numVisits")
         .exec((err, options) => {
-            if (err) return res.status(500).send(err)
+            if (err) {
+                console.log("PROBLEMZ")
+                if (res) return res.status(500).send(err)
+                throw err
+            }
 
             let weightedOpts = []
             const maxVal = options[options.length - 1].numVisits
@@ -55,7 +59,7 @@ function presentOptions(req, res) {
         })
 
 
-    // For when I want to add interactive buttons. For now, we'll use emoji votes
+    // For when I want to add interactive buttons.
     // const message = {
     //     channel: lunchChannelId,
     //     text: "Which place would you like to go?",
