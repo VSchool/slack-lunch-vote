@@ -49,7 +49,7 @@ function presentOptions(req, res) {
                     .then(response => {
                         // `res` contains information about the posted message
                         console.log(`Posted to Slack! ${response.ts}`)
-                        if (res) res.end()
+                        if (res) res.status(200).end()
                         resolve(response)
                     })
                     .catch(err => {
