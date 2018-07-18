@@ -10,25 +10,27 @@ if (weekdays.includes(day)) {
             if (err) throw err
             console.log("Connected to the db!")
             require("dotenv").config()
-            presentOptions()
-                .then(response => {
-                    console.log("Done!")
-                    console.log(response)
-                    mongoose.disconnect()
-                        .then(() => {
-                            console.log("Disconnected from db")
-                            process.exit(0)
-                        })
-                })
-                .catch(err => {
-                    console.error("There was a Problem!")
-                    console.error(err)
-                    mongoose.disconnect()
-                        .then(() => {
-                            console.log("Disconnected from db")
-                            process.exit(1)
-                        })
-                })
+            setTimeout(function() {
+                presentOptions()
+                    .then(response => {
+                        console.log("Done!")
+                        console.log(response)
+                        mongoose.disconnect()
+                            .then(() => {
+                                console.log("Disconnected from db")
+                                process.exit(0)
+                            })
+                    })
+                    .catch(err => {
+                        console.error("There was a Problem!")
+                        console.error(err)
+                        mongoose.disconnect()
+                            .then(() => {
+                                console.log("Disconnected from db")
+                                process.exit(1)
+                            })
+                    })
+            }, 900000)
         })
     }
 }
